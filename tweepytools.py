@@ -6,9 +6,9 @@ from tweepy import Stream
 from tweets import ProcessQueue
 # from collextions import deque
 from threading import Thread
-from configparser import ConfigParser
+from ConfigParser import ConfigParser
 import json
-from queue import Queue
+from Queue import Queue
 import time
 import signal
 
