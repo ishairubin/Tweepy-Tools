@@ -4,20 +4,20 @@ from tweepy.streaming import StreamListener
 from tweepy import OAuthHandler
 from tweepy import Stream
 from tweets import ProcessQueue
-# from collextions import deque
 from threading import Thread
 from ConfigParser import ConfigParser
-import json
 from Queue import Queue
+import json
 import time
 import signal
+import sys
 
 class TwitterStream():
 	'''
 	This class contains functions to setup and start streaming twitter data
 	'''
 
-	def __init__(self, track_list, config_file  = 'twitter-keys-file.ini'):
+	def __init__(self, track_list, data_dir, config_file  = 'twitter-keys-file.ini'):
 		'''
 		Defualt startup
 		'''
@@ -31,8 +31,10 @@ class TwitterStream():
 		q = Queue(100)
 		# Don't have to return here...
 		self.stream = self.get_stream(q)
-		# Get an instance of the queue processor 
-		self.pq = ProcessQueue(q)
+
+		# Get an instance of the queue processor
+		# A little awkward just passing data_dir arg without using
+		self.pq = ProcessQueue(q, data_dir)
 
 
 	def start_stream(self):
@@ -89,7 +91,6 @@ class TwitterStream():
 		stream = Stream(auth, listener)
 
 		return stream
-
 
 
 class StdOutListener(StreamListener):
@@ -189,24 +190,23 @@ if __name__ == '__main__':
 
 	# The filter modifies the stream capture to include tweets that fit the
 	# search criteria logical combined with logical or.  For this reason
-	trump_list = ['trump', 'trump2016', 'maga' 'nevertrump', 'trumptrain', 'makeamericagreatagain', 'trumpsfavoriteheadline', 'trumppence16']
-	conservative_list = ['tcot', 'ccot', '2a', 'pjnet', 'nra']
-	clinton_list = ['clinton', 'neverhillary', 'imwithher', 'hillary']
-	liberal_list = ['uniteblue', 'americafirst', 'blacklivesmatter']
-	track_list = trump_list + conservative_list + clinton_list + liberal_list
-	# stream.filter(languages = ['en'], track = track_list)
 
+	# Define the save directory first
+	data_dir = sys.argv[1]
 
-	# The auth config file
-	# config_file = 'twitter-keys-file.ini'
+	# Bring the track_list in from a pickle
+	track_path = sys.argv[2]
 
-	# A queue to shove status data into
+	with open(track_path, 'rb') as track_file:
+		track_list = pickle.load(track_file)
+
+	print(track_list)
 
 	# Initiate with credentials.
-	ts = TwitterStream(track_list)
+	ts = TwitterStream(track_list, data_dir)
 
-	# The main thread exits, which is awkward.
-	# Need to block or loop on something in main thread.
+	# The main thread exits, which feels awkward.
+	# Maybe block or loop on something in main thread.
 	signal.signal(signal.SIGINT, ts.stop_stream)
 	ts.start_stream()
 

@@ -217,7 +217,7 @@ class ProcessFile():
 
 class ProcessQueue():
 
-	def __init__(self, data_queue):
+	def __init__(self, data_queue, data_dir):
 		'''
 		Create a dataframe
 		Makes sense to take the data queue
@@ -226,7 +226,9 @@ class ProcessQueue():
 		# The data queue to read from
 		self.q = data_queue
 
-		# Maybe this whould be it's own file writing class
+		self.data_dir = data_dir
+
+		# Maybe this should be it's own file writing class
 		self.list_q = Queue(2)
 
 		# The list to write status dicts to.
@@ -390,12 +392,15 @@ class ProcessQueue():
 		sys.stdout.write('\n')
 		sys.stdout.flush()
 
-		data_dir = datetime.datetime.now().strftime('%Y_%m_%d')
-		if not os.path.exists(data_dir):
-		    os.makedirs(data_dir)
+		# data_dir = self.data_dir
+
+		date_dir = datetime.datetime.now().strftime('%Y_%m_%d')
+		data_path = os.path.join(self.data_dir, date_dir)
+		if not os.path.exists(data_path):
+		    os.makedirs(data_path)
 
 		file_name = datetime.datetime.now().strftime('%H_%M_%S')
-		self.file_path = os.path.join(data_dir, file_name) + '.p'
+		self.file_path = os.path.join(data_path, file_name) + '.p'
 
 		# This is a cPickle (not a sea cucumber)
 		with open(self.file_path, 'wb') as f:
