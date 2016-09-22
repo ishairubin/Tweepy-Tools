@@ -7,6 +7,7 @@ from tweets import ProcessQueue
 from threading import Thread
 from ConfigParser import ConfigParser
 from Queue import Queue
+import cPickle as pickle
 import json
 import time
 import signal
